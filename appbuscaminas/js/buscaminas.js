@@ -1,5 +1,6 @@
 
 			var mine = inicializaMatriz();
+			var mostradas = 0;
 
 			function inicializaMatriz(){
 				var tabla = [];
@@ -31,7 +32,7 @@
 					abrirAlrededor(parseInt(auxstr[0],10),parseInt(auxstr[1],10),mine);
 				}else{
 					/* If the clicked position is not 0 and not bomb then this happens. */
-					if(mine[parseInt(auxstr[0],10)][parseInt(auxstr[1],10)] != "*"){
+					if(mine[parseInt(auxstr[0],10)][parseInt(auxstr[1],10)] != "*" && mine[parseInt(auxstr[0],10)][parseInt(auxstr[1],10)] != "9"){
 						document.getElementById(myid).innerHTML = "<p style='margin-top:15px;'>" + mine[parseInt(auxstr[0],10)][parseInt(auxstr[1],10)] + "</p>";
 
 						var valor_punto = mine[parseInt(auxstr[0],10)][parseInt(auxstr[1],10)];
@@ -47,13 +48,15 @@
 						restartGame();
 					}
 				}
+				mostradas++;
+				checkDiscovered();
 			}
 
 			/* Calculates the number of the around bombs for each position. It takes in account the borders. */
 			function bombasAlrededor(tablero){
 				for(var i = 0; i < 8; i++){
 			        for(var j = 0; j < 8; j++){
-			           if(tablero[i][j] == "*"){
+			           if(tablero[i][j] == "*" || tablero[i][j] == "9"){
 			           		if(i == 0 && j == 0){
 			           			increaseBombNumber(i, j, i + 1, j + 1,tablero);
 			           		}
@@ -88,7 +91,7 @@
 			function increaseBombNumber(vari,varj,fini,finj,tablero){
 				for(var i = vari; i <= fini; i++){
 			        for(var j = varj; j <= finj; j++){
-			           if(tablero[i][j] != "*"){
+			           if(tablero[i][j] != "*" && tablero[i][j] != "9"){
 			           		tablero[i][j] = (parseInt(tablero[i][j])+1);
 			           }
 			        }
@@ -110,8 +113,38 @@
 					}
 					tablero[fil][col] = "*";
 				}
+				for(var i = 0; i < 3; i++){
+					while (tablero[fil][col] == "9" || tablero[fil][col] == "*"){
+						fil = Math.floor((Math.random()*7)+0);
+						col = Math.floor((Math.random()*7)+0);
+					}
+					tablero[fil][col] = "9";
+				}
 			}
 
+/* Check if all no bombs has been discovered */
+			function checkDiscovered(){
+				for(var i = 0; i <= 7; i++){
+			        for(var j = 0; j <= 7; j++){
+			        	var myid = i+""+j;
+			        	var objDiv =  document.getElementById(myid)
+			           if(objDiv.textContent != ""){
+							mostradas++;
+			           } else if(objDiv.style.backgroundColor == "green"){
+			           					mostradas++;
+			           				}
+			       }
+			   }
+			   		mostradas--;
+			   		console.log("Mostradas" + mostradas); // Print showed slots
+			          if(mostradas>(8*8-8-1)){
+							alert("Has ganado :)");
+							restartGame();
+						} else {
+							mostradas=0;
+						}
+
+			}
 			/* Once we have determined the surrounding area to be opened then we check every position */
 			function abrirCeros(vari,varj,fini,finj,cori,corj,tablero){
 				for(var i = vari; i <= fini; i++){
@@ -134,7 +167,7 @@
 
 							/* Adds numbered position. Check there is not bomb. */
 			           		}else{
-			           			if(tablero[i][j] != "*"){
+			           			if(tablero[i][j] != "*" && tablero[i][j] != "9"){
 			           				document.getElementById(myid).innerHTML = "<p style='margin-top:15px;'>" + tablero[i][j] + "</p>";
 			           				if(tablero[i][j] == 1){objDiv.style.backgroundColor = "yellow";
 			           					}
@@ -143,6 +176,8 @@
 			           			}
 			           		}
 			           }
+
+
 			        }
 			    }
 			}
@@ -185,6 +220,9 @@
 			           if(tablero[i][j] == "*"){
 			           		objDiv.style.backgroundImage = "url(img/bomba.jpg)";
 			           }
+			           if(tablero[i][j] == "9"){
+			           		objDiv.style.backgroundImage = "url(img/false_bomba.jpg)";
+			           }
 			        }
 			    }
 			}
@@ -195,6 +233,7 @@
     			myNode.removeChild(myNode.firstChild);
 				}
 				mine = inicializaMatriz();
+				mostradas=0;
 				cargarTablero();
 			}
 
